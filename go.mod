@@ -1,4 +1,4 @@
-module melissa
+module github.com/nenormalka/melissa
 
 go 1.22.1
 
