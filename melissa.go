@@ -2,14 +2,12 @@ package melissa
 
 import (
 	"context"
-	"log"
+	"os"
 
-	"github.com/nenormalka/melissa/config"
-	"github.com/nenormalka/melissa/logger"
-	"github.com/nenormalka/melissa/runnable"
+	log "github.com/nenormalka/melissa/logger"
+	"github.com/nenormalka/melissa/types"
 
 	"github.com/chapsuk/grace"
-	"github.com/joho/godotenv"
 	"go.uber.org/dig"
 )
 
@@ -29,15 +27,15 @@ type (
 	ServiceAdapterIn struct {
 		dig.In
 
-		Services []runnable.Runnable `group:"services"`
-		Servers  []runnable.Runnable `group:"servers"`
+		Services []types.Runnable `group:"services"`
+		Servers  []types.Runnable `group:"servers"`
 	}
 
 	ServiceAdapterOut struct {
 		dig.Out
 
-		ServiceList runnable.ServiceList
-		ServerList  runnable.ServerList
+		ServiceList types.ServiceList
+		ServerList  types.ServerList
 	}
 )
 
@@ -49,12 +47,10 @@ func ServiceAdapter(in ServiceAdapterIn) ServiceAdapterOut {
 }
 
 var defaultModules = Module{
-	{CreateFunc: config.NewConfig},
-	{CreateFunc: logger.NewLogger},
 	{CreateFunc: ServiceAdapter},
 	{CreateFunc: NewShutdownContext},
-	{CreateFunc: runnable.NewServerPool},
-	{CreateFunc: runnable.NewServicePool},
+	{CreateFunc: types.NewServerPool},
+	{CreateFunc: types.NewServicePool},
 	{CreateFunc: NewApp},
 }
 
@@ -74,17 +70,17 @@ func NewEngine(mainFunc any, modules Module) *Engine {
 }
 
 func (e *Engine) Run() {
-	godotenv.Overload()
-
 	if err := e.container.Invoke(e.mainFunc); err != nil {
-		log.Fatalf("invoke err %s", err.Error())
+		log.NewLogger().Error("invoke err %s", err.Error())
+		os.Exit(1)
 	}
 }
 
 func (e *Engine) provide(m Module) {
 	for _, c := range m {
 		if err := e.container.Provide(c.CreateFunc, c.Options...); err != nil {
-			log.Fatalf("provide err %s", err.Error())
+			log.NewLogger().Error("provide err %s", err.Error())
+			os.Exit(1)
 		}
 	}
 }

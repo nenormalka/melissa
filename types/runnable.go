@@ -1,11 +1,11 @@
-package runnable
+package types
 
 import (
 	"context"
 	"fmt"
 	"sync"
 
-	"go.uber.org/zap"
+	log "github.com/nenormalka/melissa/logger"
 )
 
 type (
@@ -22,7 +22,9 @@ const (
 	runnableService runnableType = "service"
 )
 
-func start(ctx context.Context, pool []Runnable, logger *zap.Logger, name runnableType) error {
+func start(ctx context.Context, pool []Runnable, name runnableType) error {
+	logger := log.NewLogger()
+
 	logger.Info(fmt.Sprintf("Graceful: Run %s...", name))
 
 	for _, s := range pool {
@@ -38,7 +40,9 @@ func start(ctx context.Context, pool []Runnable, logger *zap.Logger, name runnab
 	return nil
 }
 
-func stop(ctx context.Context, pool []Runnable, logger *zap.Logger, name runnableType) {
+func stop(ctx context.Context, pool []Runnable, name runnableType) {
+	logger := log.NewLogger()
+
 	logger.Info(fmt.Sprintf("Graceful: Stopping %s...", name))
 
 	var wg sync.WaitGroup
@@ -50,7 +54,7 @@ func stop(ctx context.Context, pool []Runnable, logger *zap.Logger, name runnabl
 			defer wg.Done()
 
 			if err := r.Stop(ctx); err != nil {
-				logger.Error(fmt.Sprintf("stop %s...", name), zap.Error(err))
+				logger.Error(fmt.Sprintf("stop %s... err %s", name, err.Error()))
 
 				return
 			}

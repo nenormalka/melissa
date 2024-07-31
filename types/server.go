@@ -1,11 +1,11 @@
-package runnable
+package types
 
 import (
 	"context"
+	"log/slog"
+	"os"
 	"strings"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 const (
@@ -16,29 +16,26 @@ type (
 	ServerList []Runnable
 
 	ServerPool struct {
-		p      []Runnable
-		logger *zap.Logger
+		p []Runnable
 	}
 )
 
-func NewServerPool(sl ServerList, logger *zap.Logger) *ServerPool {
+func NewServerPool(sl ServerList) *ServerPool {
 	return &ServerPool{
-		p:      sl,
-		logger: logger,
+		p: sl,
 	}
 }
 
 func (p *ServerPool) Start(ctx context.Context) error {
-	return start(ctx, p.p, p.logger, runnableServer)
+	return start(ctx, p.p, runnableServer)
 }
 
 func (p *ServerPool) Stop(ctx context.Context) {
-	stop(ctx, p.p, p.logger, runnableServer)
+	stop(ctx, p.p, runnableServer)
 }
 
 func StartServerWithWaiting(
 	ctx context.Context,
-	logger *zap.Logger,
 	f func(errCh chan error),
 ) error {
 	errCh := make(chan error)
@@ -48,7 +45,10 @@ func StartServerWithWaiting(
 		go func() {
 			for err := range errCh {
 				if err != nil {
-					logger.Error("server err", zap.Error(err))
+					slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+						Level:     slog.LevelError,
+						AddSource: true,
+					})).Error("server err: %v", err)
 				}
 			}
 		}()
