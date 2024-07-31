@@ -3,9 +3,9 @@ package melissa
 import (
 	"context"
 	"fmt"
-	log "github.com/nenormalka/melissa/logger"
 	"time"
 
+	log "github.com/nenormalka/melissa/logger"
 	"github.com/nenormalka/melissa/types"
 )
 
