@@ -49,9 +49,9 @@ func ServiceAdapter(in ServiceAdapterIn) ServiceAdapterOut {
 var defaultModules = Module{
 	{CreateFunc: ServiceAdapter},
 	{CreateFunc: NewShutdownContext},
+	{CreateFunc: NewApp},
 	{CreateFunc: types.NewServerPool},
 	{CreateFunc: types.NewServicePool},
-	{CreateFunc: NewApp},
 }
 
 func NewShutdownContext() context.Context {

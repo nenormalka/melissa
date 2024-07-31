@@ -23,6 +23,10 @@ const (
 )
 
 func start(ctx context.Context, pool []Runnable, name runnableType) error {
+	if len(pool) == 0 {
+		return nil
+	}
+
 	logger := log.NewLogger()
 
 	logger.Info(fmt.Sprintf("Graceful: Run %s...", name))
@@ -41,6 +45,10 @@ func start(ctx context.Context, pool []Runnable, name runnableType) error {
 }
 
 func stop(ctx context.Context, pool []Runnable, name runnableType) {
+	if len(pool) == 0 {
+		return
+	}
+
 	logger := log.NewLogger()
 
 	logger.Info(fmt.Sprintf("Graceful: Stopping %s...", name))
