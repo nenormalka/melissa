@@ -4,19 +4,20 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/nenormalka/melissa/types"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"
 )
 
 type (
 	MockEngine struct {
-		modules Module
+		modules types.Module
 	}
 
 	MockEngineOpt func(engine *MockEngine)
 )
 
-func NewMockEngine(modules Module, opts ...MockEngineOpt) *MockEngine {
+func NewMockEngine(modules types.Module, opts ...MockEngineOpt) *MockEngine {
 	engine := &MockEngine{modules: modules}
 
 	for _, opt := range opts {
@@ -33,7 +34,7 @@ func (e *MockEngine) Run(f any) error {
 func (e *MockEngine) RunTest(tt *testing.T, name string, f any) {
 	tt.Run(name, func(tt *testing.T) {
 		require.NoError(tt, e.run(f,
-			Provider{
+			types.Provider{
 				CreateFunc: func() *testing.T { return tt },
 			},
 		))
@@ -43,14 +44,14 @@ func (e *MockEngine) RunTest(tt *testing.T, name string, f any) {
 func (e *MockEngine) RunBenchmark(tb *testing.B, name string, f any) {
 	tb.Run(name, func(tb *testing.B) {
 		require.NoError(tb, e.run(f,
-			Provider{
+			types.Provider{
 				CreateFunc: func() *testing.B { return tb },
 			},
 		))
 	})
 }
 
-func (e *MockEngine) run(f any, modules ...Provider) error {
+func (e *MockEngine) run(f any, modules ...types.Provider) error {
 	var (
 		d   = dig.New()
 		err error

@@ -28,7 +28,7 @@ type (
 	}
 )
 
-var Module = melissa.Module{
+var Module = types.Module{
 	{CreateFunc: NewQueueConnectionImitator},
 	{CreateFunc: NewSimpleService},
 	{CreateFunc: Adapter},

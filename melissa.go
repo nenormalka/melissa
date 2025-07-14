@@ -17,13 +17,6 @@ type (
 		mainFunc  any
 	}
 
-	Provider struct {
-		CreateFunc any
-		Options    []dig.ProvideOption
-	}
-
-	Module []Provider
-
 	ServiceAdapterIn struct {
 		dig.In
 
@@ -46,7 +39,7 @@ func ServiceAdapter(in ServiceAdapterIn) ServiceAdapterOut {
 	}
 }
 
-var defaultModules = Module{
+var defaultModules = types.Module{
 	{CreateFunc: ServiceAdapter},
 	{CreateFunc: NewShutdownContext},
 	{CreateFunc: NewApp},
@@ -58,7 +51,7 @@ func NewShutdownContext() context.Context {
 	return grace.ShutdownContext(context.Background())
 }
 
-func NewEngine(mainFunc any, modules Module) *Engine {
+func NewEngine(mainFunc any, modules types.Module) *Engine {
 	e := &Engine{
 		container: dig.New(),
 		mainFunc:  mainFunc,
@@ -76,15 +69,11 @@ func (e *Engine) Run() {
 	}
 }
 
-func (e *Engine) provide(m Module) {
+func (e *Engine) provide(m types.Module) {
 	for _, c := range m {
 		if err := e.container.Provide(c.CreateFunc, c.Options...); err != nil {
 			log.NewLogger().Error("provide err %s", err.Error())
 			os.Exit(1)
 		}
 	}
-}
-
-func (m Module) Append(o Module) Module {
-	return append(m, o...)
 }
